@@ -1,0 +1,45 @@
+Research Design Overview
+
+This study employs a within-subjects experimental design to measure the effect of causal language density on a reader's ability to accurately construct a causal model of a text. The experiment is implemented as an interactive web application designed for deployment on GitHub Pages and data collection via Prolific.
+Causal Effect of Interest (Estimand)
+
+The primary estimand is the difference in causal map accuracy between the high-density and low-density causal language conditions. Secondary estimands include differences in task completion time, subjective clarity, and cognitive load.
+Hypotheses
+
+    Accuracy Hypothesis (H1): Participants will construct more accurate causal maps (i.e., maps that more closely match the ground-truth structure of the abstract) after reading abstracts with low-density causal language compared to those with high-density language.
+
+    Cognitive Load Hypothesis (H2): The causal mapping task will take longer to complete and will be rated as requiring higher cognitive load for the high-density abstracts.
+
+    Clarity Hypothesis (H3): Participants will rate the low-density abstracts as clearer and will report higher confidence in their constructed maps for that condition.
+
+Experimental Design
+
+    Design: Within-subjects (repeated measures).
+
+    Independent Variable: Causal Language Density (2 levels: High, Low).
+
+    Counterbalancing: The order of presentation of the high- and low-density abstracts will be counterbalanced across participants.
+
+    Dependent Variables:
+
+        Causal Map Accuracy (Objective): Measured as the structural similarity (e.g., F1 score on adjacency matrices) between the participant's drawn graph and the abstract's pre-defined ground-truth graph.
+
+        Task Completion Time (Objective): Time in seconds from the presentation of the mapping interface to submission.
+
+        Clarity Rating (Subjective): 7-point Likert scale (1=Very Unclear, 7=Very Clear).
+
+        Cognitive Load Rating (Subjective): 7-point Likert scale (1=Very Low Effort, 7=Very High Effort).
+
+Statistical Analysis Plan
+
+    Primary Analyses: A series of paired-samples t-tests will be conducted to compare the dependent variables (Accuracy, Completion Time, Clarity, Cognitive Load) between the High and Low density conditions.
+
+    Effect Sizes: Cohen's dz will be calculated for each comparison to estimate effect magnitudes.
+
+Open Science Practices
+
+    Pre-registration: The hypotheses, design, and analysis plan will be pre-registered on AsPredicted or OSF prior to data collection.
+
+    Open Materials: The interactive experiment, stimuli, and methodology will be publicly available in this GitHub repository.
+
+    Open Data: Anonymized data (participant-generated graphs and survey responses) will be shared on a public repository (e.g., OSF) upon publication.
