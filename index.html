@@ -1,0 +1,391 @@
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Causal Mapping Experiment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* General styles and for the mapping tool */
+        body { font-family: 'Inter', sans-serif; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .node {
+            cursor: move;
+            position: absolute;
+            background-color: white;
+            border: 2px solid #3b82f6; /* blue-500 */
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            user-select: none;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+        .node:hover {
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .node.selected {
+            border-color: #ef4444; /* red-500 */
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.4);
+        }
+        #mapper-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .instruction-highlight {
+            background-color: #eff6ff; /* blue-50 */
+            color: #1d4ed8; /* blue-800 */
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="app-container" class="max-w-5xl mx-auto p-4 sm:p-8">
+
+        <!-- Welcome and Consent Screen -->
+        <div id="welcome-screen" class="screen active bg-white p-8 rounded-lg shadow-md">
+            <h1 class="text-3xl font-bold text-slate-900 mb-4">Study on Text Comprehension</h1>
+            <p class="mb-6 text-slate-600">Welcome. This study investigates how people understand and mentally represent causal relationships described in academic texts. Your participation is voluntary and anonymous. The estimated duration is 10-15 minutes.</p>
+            <div class="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-md mb-6">
+                <h2 class="font-semibold mb-2">Procedure</h2>
+                <p>You will read two short philosophical abstracts. After each one, you will use an interactive tool to create a "map" of the causal relationships described in the text.</p>
+            </div>
+            <button id="start-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">Begin and Give Consent</button>
+        </div>
+
+        <!-- Task Screen -->
+        <div id="task-screen" class="screen">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-bold text-slate-900 mb-2">Abstract to Analyze</h2>
+                    <p id="abstract-topic" class="text-sm text-slate-500 mb-4"></p>
+                    <div id="abstract-text" class="prose prose-slate max-w-none"></div>
+                </div>
+                <div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h2 class="text-xl font-bold text-slate-900 mb-2">Your Task: Causal Mapping</h2>
+                        <p id="instruction-text" class="mb-4 p-3 rounded-md instruction-highlight">Click on a concept to select it as the CAUSE. Then, click on another concept to draw a causal arrow (cause → effect).</p>
+                        <div id="mapper-area" class="relative h-96 bg-slate-100 rounded-lg border-2 border-dashed border-slate-300 mt-4">
+                            <svg id="mapper-svg"></svg>
+                            <!-- Nodes will be dynamically inserted here -->
+                        </div>
+                         <div class="flex justify-between mt-4">
+                             <button id="reset-map-btn" class="bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-lg hover:bg-slate-300 transition-colors">Reset Map</button>
+                            <button id="next-task-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Post-Task Survey Screen -->
+        <div id="survey-screen" class="screen bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">Final Questions about the Abstract</h2>
+            <div class="space-y-6">
+                <div>
+                    <label for="clarity-rating" class="block text-md font-medium text-slate-700 mb-2">How clear was the abstract you just read?</label>
+                    <div class="flex justify-between text-sm text-slate-500">
+                        <span>Very Unclear</span>
+                        <span>Very Clear</span>
+                    </div>
+                    <input type="range" id="clarity-rating" min="1" max="7" value="4" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                </div>
+                <div>
+                    <label for="load-rating" class="block text-md font-medium text-slate-700 mb-2">How much mental effort did it require to understand the abstract and create the map?</label>
+                     <div class="flex justify-between text-sm text-slate-500">
+                        <span>Very Little Effort</span>
+                        <span>A Lot of Effort</span>
+                    </div>
+                    <input type="range" id="load-rating" min="1" max="7" value="4" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                </div>
+            </div>
+             <button id="submit-survey-btn" class="w-full mt-8 bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">Continue</button>
+        </div>
+
+        <!-- Thank You & Redirect Screen -->
+        <div id="thank-you-screen" class="screen text-center bg-white p-8 rounded-lg shadow-md">
+            <h1 class="text-3xl font-bold text-green-600 mb-4">Study Completed!</h1>
+            <p class="text-slate-600 text-lg mb-6">Thank you for your participation. Your data has been recorded anonymously and will contribute to our research on improving academic communication.</p>
+            <p id="redirect-message" class="text-slate-500">You will be redirected back to Prolific shortly...</p>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Prolific Integration ---
+        // IMPORTANT: Replace this with the actual Completion URL provided by Prolific
+        const PROLIFIC_COMPLETION_URL = "https://app.prolific.com/submissions/complete?cc=YOUR_CODE_HERE";
+
+        function getProlificParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                prolific_pid: urlParams.get('PROLIFIC_PID'),
+                study_id: urlParams.get('STUDY_ID'),
+                session_id: urlParams.get('SESSION_ID')
+            };
+        }
+
+        // --- Application Logic ---
+        const state = {
+            currentScreen: 'welcome-screen',
+            abstracts: [],
+            currentAbstractIndex: 0,
+            participantData: [],
+            selectedNode: null,
+            startTime: null,
+            prolificInfo: getProlificParams(),
+        };
+
+        // UI Elements
+        const screens = document.querySelectorAll('.screen');
+        const startBtn = document.getElementById('start-btn');
+        const nextTaskBtn = document.getElementById('next-task-btn');
+        const submitSurveyBtn = document.getElementById('submit-survey-btn');
+        const resetMapBtn = document.getElementById('reset-map-btn');
+        const mapperArea = document.getElementById('mapper-area');
+        const abstractTextEl = document.getElementById('abstract-text');
+        const abstractTopicEl = document.getElementById('abstract-topic');
+        const instructionTextEl = document.getElementById('instruction-text');
+
+        function navigateTo(screenId) {
+            screens.forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            state.currentScreen = screenId;
+        }
+
+        async function loadAbstracts() {
+            try {
+                // In a real deployment, this would fetch 'data/abstracts.json'
+                // For simplicity in this self-contained file, data is hardcoded.
+                const data = [
+                  { "pair_id": 1, "topic": "Consciousness and Free Will", "high_density": "This investigation sustains that consciousness underlies moral agency in decision-making processes...", "low_density": "This investigation shows that consciousness relates to moral agency in decision-making processes...", "ground_truth": { "nodes": ["Consciousness", "Moral Agency", "Autonomous Choice", "Ethical Reasoning", "Behavioral Outcomes"], "edges": [["Consciousness", "Moral Agency"],["Moral Agency", "Autonomous Choice"],["Ethical Reasoning", "Autonomous Choice"],["Autonomous Choice", "Behavioral Outcomes"]] } },
+                  { "pair_id": 2, "topic": "Artificial Intelligence Ethics", "high_density": "This study underlies that ethical reasoning facilitates moral judgment in artificial intelligence systems...", "low_density": "This study relates to ethical reasoning that supports moral judgment in artificial intelligence systems...", "ground_truth": { "nodes": ["Ethical Reasoning", "Moral Judgment", "Algorithmic Bias", "Fair Decision-Making", "Discriminatory Outcomes"], "edges": [["Ethical Reasoning", "Moral Judgment"],["Moral Judgment", "Fair Decision-Making"],["Fair Decision-Making", "Algorithmic Bias"],["Algorithmic Bias", "Discriminatory Outcomes"]] } }
+                ];
+                
+                const pair = data[Math.floor(Math.random() * data.length)];
+                const high = { type: 'high_density', text: pair.high_density, topic: pair.topic, ground_truth: pair.ground_truth };
+                const low = { type: 'low_density', text: pair.low_density, topic: pair.topic, ground_truth: pair.ground_truth };
+                
+                state.abstracts = Math.random() < 0.5 ? [high, low] : [low, high];
+            } catch (error) {
+                console.error("Error loading abstracts:", error);
+                mapperArea.innerHTML = "<p class='text-red-500 p-4'>Error: Could not load study materials. Please refresh the page.</p>";
+            }
+        }
+
+        function setupMapper() {
+            mapperArea.innerHTML = '<svg id="mapper-svg"></svg>';
+            const abstract = state.abstracts[state.currentAbstractIndex];
+            const nodes = abstract.ground_truth.nodes;
+
+            nodes.forEach((nodeLabel, i) => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = 'node';
+                nodeEl.textContent = nodeLabel;
+                nodeEl.dataset.id = nodeLabel;
+                
+                const angle = (i / nodes.length) * 2 * Math.PI;
+                const radius = Math.min(mapperArea.offsetWidth, mapperArea.offsetHeight) * 0.35;
+                const x = mapperArea.offsetWidth / 2 + radius * Math.cos(angle) - 50; // Approx width
+                const y = mapperArea.offsetHeight / 2 + radius * Math.sin(angle) - 20; // Approx height
+                nodeEl.style.left = `${x}px`;
+                nodeEl.style.top = `${y}px`;
+
+                mapperArea.appendChild(nodeEl);
+                makeDraggable(nodeEl);
+                nodeEl.addEventListener('click', handleNodeClick);
+            });
+            
+            state.startTime = Date.now();
+        }
+
+        function makeDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            element.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                let newTop = element.offsetTop - pos2;
+                let newLeft = element.offsetLeft - pos1;
+
+                const parentRect = mapperArea.getBoundingClientRect();
+                const elRect = element.getBoundingClientRect();
+                if (newLeft < 0) newLeft = 0;
+                if (newTop < 0) newTop = 0;
+                if (newLeft + elRect.width > parentRect.width) newLeft = parentRect.width - elRect.width;
+                if (newTop + elRect.height > parentRect.height) newTop = parentRect.height - elRect.height;
+
+                element.style.top = newTop + "px";
+                element.style.left = newLeft + "px";
+                updateArrows();
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        function handleNodeClick(e) {
+            const clickedNode = e.currentTarget;
+            if (!state.selectedNode) {
+                state.selectedNode = clickedNode;
+                clickedNode.classList.add('selected');
+                instructionTextEl.textContent = `Selected: "${clickedNode.dataset.id}". Now click the concept that is the EFFECT.`;
+            } else {
+                if (state.selectedNode !== clickedNode) {
+                    createArrow(state.selectedNode, clickedNode);
+                }
+                state.selectedNode.classList.remove('selected');
+                state.selectedNode = null;
+                instructionTextEl.textContent = `Click on a concept to select it as the CAUSE.`;
+            }
+        }
+
+        function createArrow(fromNode, toNode) {
+            const fromId = fromNode.dataset.id;
+            const toId = toNode.dataset.id;
+            const arrowId = `arrow-${fromId.replace(/\s/g, '')}-${toId.replace(/\s/g, '')}`;
+            
+            if (document.getElementById(arrowId)) return;
+
+            const svg = document.getElementById('mapper-svg');
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.id = arrowId;
+            line.dataset.from = fromId;
+            line.dataset.to = toId;
+            line.setAttribute('stroke', '#64748b');
+            line.setAttribute('stroke-width', '2');
+            line.setAttribute('marker-end', 'url(#arrowhead)');
+            svg.appendChild(line);
+            updateArrows();
+        }
+        
+        function updateArrows() {
+            const svg = document.getElementById('mapper-svg');
+            const lines = svg.querySelectorAll('line');
+            lines.forEach(line => {
+                const fromNode = document.querySelector(`.node[data-id="${line.dataset.from}"]`);
+                const toNode = document.querySelector(`.node[data-id="${line.dataset.to}"]`);
+                if(fromNode && toNode) {
+                    const fromRect = fromNode.getBoundingClientRect();
+                    const toRect = toNode.getBoundingClientRect();
+                    const containerRect = mapperArea.getBoundingClientRect();
+
+                    const x1 = fromRect.left - containerRect.left + fromRect.width / 2;
+                    const y1 = fromRect.top - containerRect.top + fromRect.height / 2;
+                    const x2 = toRect.left - containerRect.left + toRect.width / 2;
+                    const y2 = toRect.top - containerRect.top + toRect.height / 2;
+
+                    line.setAttribute('x1', x1);
+                    line.setAttribute('y1', y1);
+                    line.setAttribute('x2', x2);
+                    line.setAttribute('y2', y2);
+                }
+            });
+        }
+        
+        function resetMap() {
+             const svg = document.getElementById('mapper-svg');
+             svg.innerHTML = '<defs><marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" /></marker></defs>';
+             if(state.selectedNode) {
+                state.selectedNode.classList.remove('selected');
+                state.selectedNode = null;
+             }
+             instructionTextEl.textContent = `Click on a concept to select it as the CAUSE.`;
+        }
+
+        function startTask() {
+            const abstract = state.abstracts[state.currentAbstractIndex];
+            abstractTopicEl.textContent = `Topic: ${abstract.topic}`;
+            abstractTextEl.textContent = abstract.text;
+            navigateTo('task-screen');
+            setTimeout(setupMapper, 100);
+        }
+        
+        function collectData() {
+            const endTime = Date.now();
+            const abstract = state.abstracts[state.currentAbstractIndex];
+            const userEdges = [];
+            document.querySelectorAll('#mapper-svg line').forEach(line => {
+                userEdges.push([line.dataset.from, line.dataset.to]);
+            });
+
+            const data = {
+                condition: abstract.type,
+                topic: abstract.topic,
+                order: state.currentAbstractIndex + 1,
+                completionTime: (endTime - state.startTime) / 1000,
+                userGraph: {
+                    nodes: abstract.ground_truth.nodes,
+                    edges: userEdges
+                },
+                clarity: document.getElementById('clarity-rating').value,
+                cognitiveLoad: document.getElementById('load-rating').value,
+            };
+            state.participantData.push(data);
+            
+            document.getElementById('clarity-rating').value = 4;
+            document.getElementById('load-rating').value = 4;
+        }
+
+        startBtn.addEventListener('click', async () => {
+            await loadAbstracts();
+            startTask();
+        });
+
+        nextTaskBtn.addEventListener('click', () => {
+            navigateTo('survey-screen');
+        });
+
+        submitSurveyBtn.addEventListener('click', () => {
+            collectData();
+            state.currentAbstractIndex++;
+            if (state.currentAbstractIndex < state.abstracts.length) {
+                resetMap();
+                startTask();
+            } else {
+                const finalData = {
+                    prolificInfo: state.prolificInfo,
+                    responses: state.participantData
+                };
+                console.log("Final Participant Data:", JSON.stringify(finalData, null, 2));
+                // In a real study, you would send `finalData` to your server here.
+                navigateTo('thank-you-screen');
+                setTimeout(() => {
+                    window.location.href = PROLIFIC_COMPLETION_URL;
+                }, 3000);
+            }
+        });
+        
+        resetMapBtn.addEventListener('click', resetMap);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const svg = document.getElementById('mapper-svg');
+            if (svg) {
+                svg.innerHTML = '<defs><marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" /></marker></defs>';
+            }
+        });
+
+    </script>
+</body>
+</html>
