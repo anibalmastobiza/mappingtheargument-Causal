@@ -2,14 +2,25 @@
   {
     "pair_id": 1,
     "topic": "Consciousness and Free Will",
-    "high_density": "This investigation sustains that consciousness underlies moral agency in decision-making processes. The research enables autonomous choice through mediating pathways that serve as the cornerstone of ethical reasoning frameworks. Statistical analysis reveals significant predictors that translate into measurable behavioral outcomes across diverse populations.",
-    "low_density": "This investigation shows that consciousness relates to moral agency in decision-making processes. The research allows autonomous choice through pathways that act as important elements of ethical reasoning frameworks. Statistical analysis shows factors that lead to measurable behavioral outcomes across diverse populations.",
+    "high_density": "This investigation sustains that consciousness underlies moral agency in decision-making processes. The research enables autonomous choice through mediating pathways that serve as the cornerstone of ethical reasoning frameworks. Furthermore, statistical analysis reveals that these frameworks contain significant predictors that translate into measurable behavioral outcomes across diverse populations.",
+    "low_density": "This investigation shows that consciousness relates to moral agency in decision-making processes. The research allows autonomous choice through pathways that act as important elements of ethical reasoning frameworks. Additionally, statistical analysis shows that these frameworks contain factors that lead to measurable behavioral outcomes across diverse populations.",
     "ground_truth": {
-      "nodes": ["Consciousness", "Moral Agency", "Autonomous Choice", "Ethical Reasoning", "Behavioral Outcomes"],
+      "nodes": [
+        "Consciousness", 
+        "Moral Agency", 
+        "Mediating Pathways", 
+        "Autonomous Choice", 
+        "Ethical Reasoning Frameworks", 
+        "Significant Predictors", 
+        "Behavioral Outcomes"
+      ],
       "edges": [
         ["Consciousness", "Moral Agency"],
-        ["Moral Agency", "Autonomous Choice"],
-        ["Ethical Reasoning", "Autonomous Choice"],
+        ["Moral Agency", "Mediating Pathways"],
+        ["Ethical Reasoning Frameworks", "Mediating Pathways"],
+        ["Mediating Pathways", "Autonomous Choice"],
+        ["Ethical Reasoning Frameworks", "Significant Predictors"],
+        ["Significant Predictors", "Behavioral Outcomes"],
         ["Autonomous Choice", "Behavioral Outcomes"]
       ]
     }
@@ -17,16 +28,27 @@
   {
     "pair_id": 2,
     "topic": "Artificial Intelligence Ethics",
-    "high_density": "This study underlies that ethical reasoning facilitates moral judgment in artificial intelligence systems. The analysis constrains algorithmic bias through dialectical relationships that function as catalysts for technological change. Research explains variance in discriminatory outcomes through mediating variables that enable fair decision-making processes.",
-    "low_density": "This study relates to ethical reasoning that supports moral judgment in artificial intelligence systems. The analysis reduces algorithmic bias through relationships that act as factors for technological change. Research shows variation in discriminatory outcomes through variables that support fair decision-making processes.",
+    "high_density": "This study underlies that ethical reasoning facilitates moral judgment in artificial intelligence systems. The analysis constrains algorithmic bias through dialectical relationships that function as catalysts for technological change. Crucially, this research explains variance in discriminatory outcomes through mediating variables that enable fair decision-making processes within these systems.",
+    "low_density": "This study relates to ethical reasoning that supports moral judgment in artificial intelligence systems. The analysis reduces algorithmic bias through relationships that act as factors for technological change. Importantly, this research shows variation in discriminatory outcomes through variables that support fair decision-making processes within these systems.",
     "ground_truth": {
-      "nodes": ["Ethical Reasoning", "Moral Judgment", "Algorithmic Bias", "Fair Decision-Making", "Discriminatory Outcomes"],
+      "nodes": [
+        "Ethical Reasoning", 
+        "Moral Judgment", 
+        "Dialectical Relationships", 
+        "Algorithmic Bias", 
+        "Mediating Variables", 
+        "Fair Decision-Making", 
+        "Discriminatory Outcomes"
+      ],
       "edges": [
         ["Ethical Reasoning", "Moral Judgment"],
         ["Moral Judgment", "Fair Decision-Making"],
-        ["Fair Decision-Making", "Algorithmic Bias"],
+        ["Dialectical Relationships", "Algorithmic Bias"],
+        ["Mediating Variables", "Fair Decision-Making"],
+        ["Fair Decision-Making", "Discriminatory Outcomes"],
         ["Algorithmic Bias", "Discriminatory Outcomes"]
       ]
     }
   }
 ]
+
